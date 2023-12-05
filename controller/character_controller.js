@@ -12,6 +12,9 @@ async function createCharacter(req, res) {
     fragrance_note,
     tags,
     description,
+    birthday,
+    inspiration,
+    slug
   } = req.body;
 
   const payload = {
@@ -23,6 +26,9 @@ async function createCharacter(req, res) {
     fragrance_note,
     tags,
     description,
+    birthday,
+    inspiration,
+    slug
   };
 
   try {
@@ -38,6 +44,9 @@ async function createCharacter(req, res) {
         fragrance_note: true,
         tags          : true,
         description   : true,
+        birthday      : true,
+        inspiration   : true,
+        slug          : true,
       },
     });
     let resp = ResponseTemplate(char, "Success", null, 200);
@@ -51,23 +60,54 @@ async function createCharacter(req, res) {
   }
 }
 
+const ITEMS_PER_PAGE = 10; // Jumlah item per halaman
+
 async function getCharacter(req, res) {
-  const char = await prisma.character.findMany({
-    select: {
-      id            : true,
-      name          : true,
-      afflatus      : true,
-      damage_type   : true,
-      rarity        : true,
-      medium        : true,
-      fragrance_note: true,
-      tags          : true,
-      description   : true,
-    },
-  });
-  let resp = ResponseTemplate(char, "Success", null, 200);
-  res.json(resp);
+  const page = req.query.page || 1; // Halaman yang diminta (default: 1)
+  const skip = (page - 1) * ITEMS_PER_PAGE; // Item yang akan dilewati
+
+  try {
+    const char = await prisma.character.findMany({
+      select: {
+        id            : true,
+        name          : true,
+        afflatus      : true,
+        damage_type   : true,
+        rarity        : true,
+        medium        : true,
+        fragrance_note: true,
+        tags          : true,
+        description   : true,
+      },
+      skip, // Lewati sejumlah item
+      take: ITEMS_PER_PAGE, // Ambil sejumlah item
+    });
+
+    const totalCharacters = await prisma.character.count(); // Hitung total karakter
+
+    const totalPages = Math.ceil(totalCharacters / ITEMS_PER_PAGE); // Hitung total halaman
+
+    let resp = ResponseTemplate(char, "Success", null, 200, {
+      pagination: {
+        page,
+        totalPages,
+        totalItems: totalCharacters,
+      },
+    });
+
+    res.json(resp);
+  } catch (error) {
+    console.error("Error retrieving characters:", error);
+    let resp = ResponseTemplate(
+      null,
+      "Error retrieving characters",
+      error,
+      500
+    );
+    res.status(500).json(resp);
+  }
 }
+
 
 module.exports = {
   getCharacter,

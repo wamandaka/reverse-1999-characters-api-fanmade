@@ -29,7 +29,10 @@ model Character {
   medium String?
   fragrance_note String?
   tags String[]
-  description String
+  description String?
+  birthday String?
+  inspiration String?
+  slug String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?

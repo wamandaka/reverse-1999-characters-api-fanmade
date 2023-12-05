@@ -1,6 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const prisma = new PrismaClient();
+const jwt = require("jsonwebtoken");
+const { ResponseTemplate } = require("../helper/template_helper");
 
 async function register(req, res, next) {
   try {
@@ -21,29 +23,44 @@ async function register(req, res, next) {
         name: name,
         email: email,
         password: encriptedPassword,
-      }
-    })
-    return
+      },
+    });
+    return;
   } catch (error) {
-    next(error)
+    next(error);
   }
 }
 
-async function authUser(email, password, done) {
+async function authUser(req, res, done) {
   try {
+    let { email, password } = req.body;
     const user = await prisma.user.findUnique({
       where: {
         email,
       },
-    })
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return done(null, false, { message: "Incorrect email or password" });
-    } else {
-      return done(null, user);
-      
+    });
+    if (!user) {
+      let resp = ResponseTemplate(null, "User not found", null, 400);
+      res.json(resp);
+      return;
     }
+    let isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      let resp = ResponseTemplate(null, "Incorrect password", null, 400);
+      res.json(resp);
+      return;
+    }
+    let token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      process.env.SECRET_KEY
+    );
+    let resp = ResponseTemplate({ user, token }, "Success", null, 200);
+    res.json(resp);
   } catch (error) {
-    return done(null, false, { message: "Incorrect email or password" });
+    done(error);
   }
 }
 async function dashboard(req, res, next) {
@@ -51,4 +68,14 @@ async function dashboard(req, res, next) {
   res.send("Dashboard");
 }
 
-module.exports = { register, authUser, dashboard };
+function whoami(req, res) {
+  return res.status(200).json({
+    status: true,
+    message: "success",
+    data: {
+      user: req.user,
+    },
+  });
+}
+
+module.exports = { register, authUser, dashboard, whoami };
