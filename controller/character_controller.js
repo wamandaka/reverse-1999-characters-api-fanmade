@@ -78,6 +78,9 @@ async function getCharacter(req, res) {
         fragrance_note: true,
         tags          : true,
         description   : true,
+        birthday      : true,
+        inspiration   : true,
+        slug          : true,
       },
       skip, // Lewati sejumlah item
       take: ITEMS_PER_PAGE, // Ambil sejumlah item
