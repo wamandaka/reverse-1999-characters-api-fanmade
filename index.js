@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // Setel opsi CORS sesuai kebutuhan Anda
 const corsOptions = {
-  origin: "http://localhost:3000", // Gantilah dengan origin aplikasi frontend Anda
+  origin: true, // Gantilah dengan origin aplikasi frontend Anda
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
   optionsSuccessStatus: 204,
