@@ -113,6 +113,7 @@ async function getCharacter(req, res) {
 
 async function getCharacterBySlug(req, res) {
   const { slug } = req.params;
+
   try {
     const char = await prisma.character.findUnique({
       where: {
@@ -131,8 +132,13 @@ async function getCharacterBySlug(req, res) {
         birthday: true,
         inspiration: true,
         slug: true,
-      }
+      },
     });
+
+    if (!char) {
+      let resp = ResponseTemplate(null, "Character not found", null, 404);
+      return res.json(resp);
+    }
     let resp = ResponseTemplate(char, "Success", null, 200);
     res.json(resp);
   } catch (error) {
@@ -141,8 +147,39 @@ async function getCharacterBySlug(req, res) {
   }
 }
 
+// async function getCharacterById(req, res) {
+//   const { id } = req.params;
+
+//   // Validate that id is a positive integer
+//   if (!/^\d+$/.test(id)) {
+//     let resp = ResponseTemplate(null, "Invalid character ID", null, 400);
+//     return res.status(400).json(resp);
+//   }
+
+//   try {
+//     const char = await prisma.character.findUnique({
+//       where: {
+//         id: Number(id),
+//       },
+//     });
+
+//     if (!char) {
+//       let resp = ResponseTemplate(null, "Character not found", null, 404);
+//       return res.status(404).json(resp);
+//     }
+
+//     let resp = ResponseTemplate(char, "Success", null, 200);
+//     res.json(resp);
+//   } catch (error) {
+//     console.error("Error retrieving character:", error);
+//     let resp = ResponseTemplate(null, "Internal Server Error", error, 500);
+//     res.status(500).json(resp);
+//   }
+// }
+
 module.exports = {
   getCharacter,
   createCharacter,
   getCharacterBySlug,
+  // getCharacterById,
 };
