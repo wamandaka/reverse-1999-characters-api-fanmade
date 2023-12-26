@@ -14,7 +14,7 @@ async function createCharacter(req, res) {
     description,
     birthday,
     inspiration,
-    slug
+    slug,
   } = req.body;
 
   const payload = {
@@ -28,25 +28,25 @@ async function createCharacter(req, res) {
     description,
     birthday,
     inspiration,
-    slug
+    slug,
   };
 
   try {
     const char = await prisma.character.create({
       data: payload,
       select: {
-        id            : true,
-        name          : true,
-        afflatus      : true,
-        damage_type   : true,
-        rarity        : true,
-        medium        : true,
+        id: true,
+        name: true,
+        afflatus: true,
+        damage_type: true,
+        rarity: true,
+        medium: true,
         fragrance_note: true,
-        tags          : true,
-        description   : true,
-        birthday      : true,
-        inspiration   : true,
-        slug          : true,
+        tags: true,
+        description: true,
+        birthday: true,
+        inspiration: true,
+        slug: true,
       },
     });
     let resp = ResponseTemplate(char, "Success", null, 200);
@@ -69,18 +69,18 @@ async function getCharacter(req, res) {
   try {
     const char = await prisma.character.findMany({
       select: {
-        id            : true,
-        name          : true,
-        afflatus      : true,
-        damage_type   : true,
-        rarity        : true,
-        medium        : true,
+        id: true,
+        name: true,
+        afflatus: true,
+        damage_type: true,
+        rarity: true,
+        medium: true,
         fragrance_note: true,
-        tags          : true,
-        description   : true,
-        birthday      : true,
-        inspiration   : true,
-        slug          : true,
+        tags: true,
+        description: true,
+        birthday: true,
+        inspiration: true,
+        slug: true,
       },
       skip, // Lewati sejumlah item
       take: ITEMS_PER_PAGE, // Ambil sejumlah item
@@ -111,8 +111,38 @@ async function getCharacter(req, res) {
   }
 }
 
+async function getCharacterBySlug(req, res) {
+  const { slug } = req.params;
+  try {
+    const char = await prisma.character.findUnique({
+      where: {
+        slug,
+      },
+      select: {
+        id: true,
+        name: true,
+        afflatus: true,
+        damage_type: true,
+        rarity: true,
+        medium: true,
+        fragrance_note: true,
+        tags: true,
+        description: true,
+        birthday: true,
+        inspiration: true,
+        slug: true,
+      }
+    });
+    let resp = ResponseTemplate(char, "Success", null, 200);
+    res.json(resp);
+  } catch (error) {
+    let resp = ResponseTemplate(null, "Internal Server Error", error, 500);
+    res.json(resp);
+  }
+}
 
 module.exports = {
   getCharacter,
   createCharacter,
+  getCharacterBySlug,
 };
