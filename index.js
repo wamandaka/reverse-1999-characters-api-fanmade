@@ -20,15 +20,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-// Misalnya, dalam Express.js
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', true); // Gantilah dengan origin aplikasi frontend Anda
-//   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-//   res.header('Access-Control-Allow-Headers', 'Content-Type');
-//   res.header('Access-Control-Allow-Credentials', 'true');
-
-//   next();
-// });
 
 app.use(
   session({
@@ -49,9 +40,9 @@ app.use(authUser);
 app.use("/", router);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.render("home.ejs");
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Example app listening at http://localhost:${port}`);
 });
