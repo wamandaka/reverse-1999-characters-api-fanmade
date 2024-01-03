@@ -60,11 +60,12 @@ async function createCharacter(req, res) {
   }
 }
 
-const ITEMS_PER_PAGE = 10; // Jumlah item per halaman
+// const ITEMS_PER_PAGE = 10; // Jumlah item per halaman
 
 async function getCharacter(req, res) {
+  const limit = req.query.limit || 10;
   const page = req.query.page || 1; // Halaman yang diminta (default: 1)
-  const skip = (page - 1) * ITEMS_PER_PAGE; // Item yang akan dilewati
+  const skip = (page - 1) * +limit; // Item yang akan dilewati
 
   try {
     const char = await prisma.character.findMany({
@@ -83,18 +84,19 @@ async function getCharacter(req, res) {
         slug: true,
       },
       skip, // Lewati sejumlah item
-      take: ITEMS_PER_PAGE, // Ambil sejumlah item
+      take: +limit, // Ambil sejumlah item
     });
 
     const totalCharacters = await prisma.character.count(); // Hitung total karakter
 
-    const totalPages = Math.ceil(totalCharacters / ITEMS_PER_PAGE); // Hitung total halaman
+    const totalPages = Math.ceil(totalCharacters / +limit); // Hitung total halaman
 
     let resp = ResponseTemplate(char, "Success", null, 200, {
       pagination: {
         page,
         totalPages,
         totalItems: totalCharacters,
+        limit: +limit,
       },
     });
 
@@ -146,6 +148,7 @@ async function getCharacterBySlug(req, res) {
     res.json(resp);
   }
 }
+
 
 // async function getCharacterById(req, res) {
 //   const { id } = req.params;
